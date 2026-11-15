@@ -2,11 +2,21 @@ using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
+    public enum SortBy
+    {
+        ID,
+        Value
+    }
+
+    public SortBy sortMode;
+    public bool searchSortedID;
+    public int targetID;
+    public GameObject inventory; // The object thet holds the Items
     public InventoryItem items;
     public InventoryItem[] inventoryItems;
     public int listSize;
     public string[] itemNames;
-
+    
     public string itemSearch; // make a public string you can quickly type items into
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -37,7 +47,7 @@ public class InventoryManager : MonoBehaviour
     {
         for (int i = 0; i < listSize; i++)
         {
-            inventoryItems[i] = Instantiate(items);
+            inventoryItems[i] = Instantiate(items, transform.position, Quaternion.identity, inventory.transform);
             inventoryItems[i].Name = itemNames[Random.Range(0, itemNames.Length)]; // make the name a random selection from the itemNames array
             inventoryItems[i].Value = Random.Range(1, 100);
             inventoryItems[i].ID = Random.Range(1, 10000);
@@ -53,9 +63,78 @@ public class InventoryManager : MonoBehaviour
                 return inventoryItems[i]; // return the entire item
             }
         }
-
-
-
         return null; // return null if not
+    }
+
+    public InventoryItem BinarySearchByID(int targetID)
+    {
+        int left = 0;
+        int right = inventoryItems.Length - 1;
+
+        while (left <= right)
+        {
+            int mid = left + (right - left) / 2;
+
+            if (inventoryItems[mid].ID == targetID)
+            {
+                Debug.Log("Item ID found: " + inventoryItems[mid] + "!");
+                return inventoryItems[mid]; // Found the matching ID
+            }
+
+            if (inventoryItems[mid].ID < targetID)
+            {
+                left = mid + 1; // Target is in the right half
+            }
+            else
+            {
+                right = mid - 1; // Target is in the left half
+            }
+        }
+        Debug.Log("Item ID not found.");
+        return null; // ID not found
+    }
+
+    public void SortByID()
+    {
+        for (int i = 0; i < inventoryItems.Length - 1; i++)
+        {
+            for (int j = 0; j < inventoryItems.Length - i - 1; j++)
+            {
+                if (inventoryItems[j].ID > inventoryItems[j + 1].ID)
+                {
+                    Swap(inventoryItems, j, j + 1);
+                }
+            }
+        }
+    }
+
+    public void Swap(InventoryItem[] itemsArray, int indexA, int indexB)
+    {
+        InventoryItem temp = itemsArray[indexA];
+        itemsArray[indexA] = itemsArray[indexB];
+        itemsArray[indexB] = temp;
+    }
+
+    public void InventorySorter()
+    {
+        switch (sortMode)
+        {
+            case SortBy.ID:
+                SortByID();
+                if (searchSortedID)
+                {
+                    BinarySearchByID(targetID);
+                }
+                break;
+
+            case SortBy.Value:
+                
+                break;
+        }
+
+        for (int i = 0; i < inventoryItems.Length; i++)
+        {
+            inventoryItems[i].transform.SetSiblingIndex(i);
+        }
     }
 }
