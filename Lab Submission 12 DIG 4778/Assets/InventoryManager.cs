@@ -25,6 +25,8 @@ public class InventoryManager : MonoBehaviour
         inventoryItems = new InventoryItem[listSize];
         generateItems();
 
+        InventorySorter();
+
         InventoryItem foundItem = LinearSearchByName(itemSearch);
 
         if (foundItem != null)
@@ -108,6 +110,35 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    public void QuickSort(InventoryItem[] arr, int low, int high)
+    {
+        if (low < high) {
+            int pi = Partition(arr, low, high); //origional sorting
+
+            QuickSort(arr, low, pi - 1); //sorting of the low numbers lower than the pivot
+            QuickSort(arr, pi + 1, high); //sorting of the high numbers higher than the pivot
+        }
+    }
+
+    private int Partition(InventoryItem[] arr, int low, int high)
+    {
+        int pivot = arr[high].Value;
+        int i = low - 1;
+
+        for (int j = low; j < high; j++) {
+            if (arr[j].Value < pivot) {
+                i++;
+
+                Swap(arr, i, j);
+            }
+        }
+
+        Swap(arr, i + 1, high);
+        return i + 1;
+    }
+
+    
+
     public void Swap(InventoryItem[] itemsArray, int indexA, int indexB)
     {
         InventoryItem temp = itemsArray[indexA];
@@ -128,7 +159,7 @@ public class InventoryManager : MonoBehaviour
                 break;
 
             case SortBy.Value:
-                
+                QuickSort(inventoryItems, 0, inventoryItems.Length - 1);
                 break;
         }
 
